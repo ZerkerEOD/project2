@@ -24,10 +24,10 @@ comp_print () {
 	print_header
 	for i in "${f_name[@]}"
 	do
-		tmp_f_name= f_name[@]
-		tmp_l_name= l_name[@]
-		tmp_e_mail= e_mail[@]
-		tmp_phone= phone[@]
+		local tmp_f_name=f_name[@]
+		local tmp_l_name=l_name[@]
+		local tmp_e_mail=e_mail[@]
+		local tmp_phone=phone[@]
 		print_contact $tmp_l_name $tmp_f_name $tmp_e_mail $tmp_phone
 	done
 }
@@ -37,16 +37,23 @@ rs_contact () {
 	awk -F ":"  '{f_name[NR]=$1;l_name[NR]=$2;e_mail[NR]=$3;phone[NR]=$4}' contact.txt
 }
 
+#Setting Flags
+flag_insert_contact=0
+flag_print_contacts=0
+flag_sort_contacts=0
+
 #Getting options and starting script
 while getopts ":iPs:f:l:e:n:k:c:" opt; do
 	case $opt in
-		i) if [ *command needed to verify -f was used* && *etc with -len* ]
-		   then 
-			insert_contact
-		   fi;;
-		l) lname= "$OPTARGT"
-		\?)
-		 	echo "Invalid option: -$OPTARG" >&2
-			;;
+		i ) flag_insert_contact=1;;
+		P ) flag_print_contacts=1;;
+		f ) fname="$OPTARG";;
+		l ) lname="$OPTARG";;
+		e ) email="$OPTARG";;
+		n ) phone="$OPTARG";;
+		\?) echo "Invalid option: -$OPTARG" >&2
+			exit 1;;
+		: ) echo "Option -"$OPTARG" requires an argument." >&2
+			exit 1;;
 	esac
 done
