@@ -19,6 +19,27 @@ print_header () {
 	printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
 }
 
+#Data validation
+#Email validation
+email_validation () {
+if echo $1 | egrep "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" 
+then 
+	return 1
+else
+	exit 1
+fi
+}
+
+#Phone validation
+phone_validation () {
+if echo $1 | egrep "^(\d{10}|((([0-9]{3})\s){2})[0-9]{4}|((([0-9]{3})\-){2})[0-9]{4}|([(][0-9]{3}[)])[0-9]{3}[-][0-9]{4})$"
+then
+	return 1
+else
+	exit 1
+fi
+}
+
 #Complete contact print
 comp_print () {
 	print_header
@@ -28,7 +49,7 @@ comp_print () {
 		local tmp_l_name=l_name[@]
 		local tmp_e_mail=e_mail[@]
 		local tmp_phone=phone[@]
-		print_contact $tmp_l_name $tmp_f_name $tmp_e_mail $tmp_phone
+		print_contact "$tmp_l_name" "$tmp_f_name" "$tmp_e_mail" "$tmp_phone"
 	done
 }
 
