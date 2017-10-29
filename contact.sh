@@ -41,6 +41,10 @@ rs_contact () {
 flag_insert_contact=0
 flag_print_contacts=0
 flag_sort_contacts=0
+fname=0
+lname=0
+email=0
+phone=0
 
 #Getting options and starting script
 while getopts ":iPs:f:l:e:n:k:c:" opt; do
@@ -57,3 +61,8 @@ while getopts ":iPs:f:l:e:n:k:c:" opt; do
 			exit 1;;
 	esac
 done
+
+if (( $flag_insert_contact == 1 && $fname != 0 && $lname != 0 && $email != 0 && $phone != 0 ))
+then 
+	insert_contact "$fname" "$lname" "$email" "$phone"
+
