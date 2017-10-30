@@ -83,7 +83,8 @@ while getopts ":iPs:f:l:e:n:k:c:" opt; do
 	esac
 done
 
+#Testing to add contact else exit with error
 if (( $flag_insert_contact == 1 && $fname != 0 && $lname != 0 && $email != 0 && $phone != 0 ))
 then 
 	insert_contact "$fname" "$lname" "$email" "$phone"
-
+else 
