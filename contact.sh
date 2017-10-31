@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 set -u
+set -x
 set -o pipefail
 
 
@@ -24,7 +25,7 @@ print_header () {
 email_validation () {
 if echo $1 | egrep "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" 
 then 
-	return $1
+	email=$1
 else
 	exit 1
 fi
@@ -32,9 +33,9 @@ fi
 
 #Phone validation
 phone_validation () {
-if echo $1 | egrep "^(\d{10}|((([0-9]{3})\s){2})[0-9]{4}|((([0-9]{3})\-){2})[0-9]{4}|([(][0-9]{3}[)])[0-9]{3}[-][0-9]{4})$"
+if echo $1 | egrep '+?(1[-])?((\d{3})[-]|(\d{3}[-]?)){2}\d{4}'
 then
-	return $1
+	phone=$1
 else
 	exit 1
 fi
@@ -88,6 +89,7 @@ flag_insert_contact=0
 flag_print_contacts=0
 flag_sort_contacts=0
 flag_search_contacts=0
+file_name=0
 fname=0
 lname=0
 email=0
@@ -104,6 +106,7 @@ while getopts ":iPs:f:l:e:n:k:c:" opt; do
 		l ) lname="$OPTARG";;
 		e ) email="$OPTARG";;
 		n ) phone="$OPTARG";;
+		c ) file_name="$OPTARG";;
 		\?) echo "Invalid option: -$OPTARG" >&2
 			exit 1;;
 		: ) echo "Option -"$OPTARG" requires an argument." >&2
@@ -111,37 +114,44 @@ while getopts ":iPs:f:l:e:n:k:c:" opt; do
 	esac
 done
 
-$email=email_validation "$email"
-$phone=phone_validation "$phone"
+if (($email != 0 )) 
+then
+	email=$(email_validation "$email")
+fi
+
+if (( $phone != 0 ))
+then
+	phone=$(phone_validation "$phone")
+fi
 
 #Testing to add contact else exit with error
 if (( $flag_insert_contact == 1 && $fname != 0 && $lname != 0 && $email != 0 && $phone != 0 ))
 then 
 	insert_contact "$fname" "$lname" "$email" "$phone"
-else
-	exit 1
 fi
 
 #Printing contacts
 if (( $flag_print_contacts == 1 ))
 then
-	if (( flag_search_contacts != 0 && flag_sort_contacts == 0 )) 
+	if (( $flag_search_contacts != 0 && $flag_sort_contacts == 0 )) 
 	then
 		cat contact.txt | egrep '\"$flag_search_contacts\"' | awk -F ":" '{f_name[NR]=$1;l_name[NR]=$2;e_mail[NR]=$3;phone[NR]=$4}'
 		comp_print
 	fi
 	
-	if (( flag_search_contacts != 0 && flag_sort_contacts != 0 ))
+	if (( $flag_search_contacts != 0 && $flag_sort_contacts != 0 ))
 	then
 		cat contact.txt | egrep '\"$flag_search_contacts\"' | sort -t ":" -k contact_sort | awk -F ":" '{f_name[NR]=$1;l_name[NR]=$2;e_mail[NR]=$3;phone[NR]=$4}'
 		comp_print
 	fi
-	if (( flag_search_contacts == 0 && flag_sort_contacts != 0 ))
+	if (( $flag_search_contacts == 0 && $flag_sort_contacts != 0 ))
 	then
 		cat contact.txt | sort -t ":" -k contact_sort | awk -F ":" '{f_name[NR]=$1;l_name[NR]=$2;e_mail[NR]=$3;phone[NR]=$4}'
 		comp_print
 	fi
-else
-	rs_contact
-	comp_print
+ 	if (( $flag_search_contacts == 0 && $flag_sort_contacts == 0 ))
+	then
+		rs_contact
+		comp_print
+	fi
 fi
