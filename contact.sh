@@ -75,6 +75,7 @@ contact_sort () {
 			return 3
 		fi
 		if (( $flag_sort_contacts == p ))
+		then
 			return 4
 		fi
 	else
