@@ -23,7 +23,8 @@ print_header () {
 #Data validation
 #Email validation
 email_validation () {
-if echo $1 | egrep "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" 
+test=`echo $1 | egrep "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" | wc -l`
+if [ $test == "1" ]
 then 
 	email=$1
 else
@@ -33,7 +34,7 @@ fi
 
 #Phone validation
 phone_validation () {
-test=`echo $1 | egrep '+?(1[-])?((\d{3})[-]|(\d{3}[-]?)){2}\d{4}' | wc -l`
+test=`echo $1 | egrep '[(]?[2-9]{1}[0-9]{2}[)-.]?[2-9]{1}[0-9]{2}[-.]?[0-9]{4}' | wc -l`
 if [ $test == "1" ]
 then
 	phone=$1
@@ -120,7 +121,7 @@ then
 	email=$(email_validation "$email")
 fi
 
-if (( $phone != 0 ))
+if [ "$phone" != "0" ]
 then
 	phone=$(phone_validation "$phone")
 fi
