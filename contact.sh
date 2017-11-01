@@ -34,7 +34,7 @@ fi
 
 #Phone validation
 phone_validation () {
-test=`echo $1 | egrep '[(]?[2-9]{1}[0-9]{2}[)-.]?[2-9]{1}[0-9]{2}[-.]?[0-9]{4}' | wc -l`
+test=`echo $1 | egrep '[0-9]{3}-[0-9]{3}-[0-9]{4}' | wc -l`
 if [ $test == "1" ]
 then
 	phone=$1
@@ -58,6 +58,13 @@ comp_print () {
 
 #Reads the file with field deliminator of colon and stores values to 4 arrays
 rs_contact () {
+    awk -F":" '
+BEGIN{
+ printf header
+}
+{
+ normal printf here
+}'
 	awk -F ":"  '{f_name[NR]=$1;l_name[NR]=$2;e_mail[NR]=$3;phone[NR]=$4}' contact.txt
 }
 
@@ -118,7 +125,7 @@ done
 
 if [ "$email" != "0" ] 
 then
-	email=$(email_validation "$email")
+	email_validation "$email"
 fi
 
 if [ "$phone" != "0" ]
@@ -127,7 +134,11 @@ then
 fi
 
 #Testing to add contact else exit with error
-if (( $flag_insert_contact == 1 && $fname != 0 && $lname != 0 && $email != 0 && $phone != 0 ))
+if [ "$flag_insert_contact" == "1" ] && 
+   [ "$fname" != "0" ] && 
+   [ "$lname" != "0" ] && 
+   [ "$email" != "0" ] && 
+   [ "$phone" != "0" ]
 then 
 	insert_contact "$fname" "$lname" "$email" "$phone"
 fi
