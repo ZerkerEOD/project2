@@ -33,7 +33,8 @@ fi
 
 #Phone validation
 phone_validation () {
-if echo $1 | egrep '+?(1[-])?((\d{3})[-]|(\d{3}[-]?)){2}\d{4}'
+test=`echo $1 | egrep '+?(1[-])?((\d{3})[-]|(\d{3}[-]?)){2}\d{4}' | wc -l`
+if [ $test == "1" ]
 then
 	phone=$1
 else
@@ -92,7 +93,7 @@ flag_search_contacts=0
 file_name=0
 fname=0
 lname=0
-email=0
+email="0"
 phone=0
 
 #Getting options and starting script
@@ -114,7 +115,7 @@ while getopts ":iPs:f:l:e:n:k:c:" opt; do
 	esac
 done
 
-if (($email != 0 )) 
+if [ "$email" != "0" ] 
 then
 	email=$(email_validation "$email")
 fi
