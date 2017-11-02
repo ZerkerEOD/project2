@@ -10,10 +10,24 @@ insert_contact () {
 	printf "%s:%s:%s:%s\n" "$1" "$2" "$3" "$4" >> contact.txt
 }
 
-#Prints the contacts to the display
-print_contact () {
-	printf "%10s %10s %25s %15s\n" "$1" "$2" "$3" "$4"
+#Printing contacts
+contact_print () {
+#	awk -F":" 
+#BEGIN{
+#	printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
+#}
+#{
+#	awk -F":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}' contact.txt
+#}
+printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
+awk -F":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}' contact.txt
+
+
+
 }
+
+
+
 
 #Prints the header for the contacts
 print_header () {
@@ -24,10 +38,8 @@ print_header () {
 #Email validation
 email_validation () {
 test=`echo $1 | egrep "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" | wc -l`
-if [ $test == "1" ]
+if [ $test == "0" ]
 then 
-	email=$1
-else
 	exit 1
 fi
 }
@@ -35,10 +47,8 @@ fi
 #Phone validation
 phone_validation () {
 test=`echo $1 | egrep '[0-9]{3}-[0-9]{3}-[0-9]{4}' | wc -l`
-if [ $test == "1" ]
+if [ $test == "0" ]
 then
-	phone=$1
-else
 	exit 1
 fi
 }
@@ -54,18 +64,6 @@ comp_print () {
 		local tmp_phone=phone[@]
 		print_contact "$tmp_l_name" "$tmp_f_name" "$tmp_e_mail" "$tmp_phone"
 	done
-}
-
-#Reads the file with field deliminator of colon and stores values to 4 arrays
-rs_contact () {
-    awk -F":" '
-BEGIN{
- printf header
-}
-{
- normal printf here
-}'
-	awk -F ":"  '{f_name[NR]=$1;l_name[NR]=$2;e_mail[NR]=$3;phone[NR]=$4}' contact.txt
 }
 
 #Sorting contacts
@@ -130,7 +128,7 @@ fi
 
 if [ "$phone" != "0" ]
 then
-	phone=$(phone_validation "$phone")
+	phone_validation "$phone"
 fi
 
 #Testing to add contact else exit with error
@@ -164,7 +162,6 @@ then
 	fi
  	if (( $flag_search_contacts == 0 && $flag_sort_contacts == 0 ))
 	then
-		rs_contact
-		comp_print
+		contact_print
 	fi
 fi
