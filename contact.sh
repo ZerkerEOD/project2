@@ -12,26 +12,8 @@ insert_contact () {
 
 #Printing contacts
 contact_print () {
-#	awk -F":" 
-#BEGIN{
-#	printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
-#}
-#{
-#	awk -F":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}' contact.txt
-#}
 printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
 awk -F":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}' contact.txt
-
-
-
-}
-
-
-
-
-#Prints the header for the contacts
-print_header () {
-	printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
 }
 
 #Data validation
@@ -53,60 +35,50 @@ then
 fi
 }
 
-#Complete contact print
-comp_print () {
-	print_header
-	for i in "${f_name[@]}"
-	do
-		local tmp_f_name=f_name[@]
-		local tmp_l_name=l_name[@]
-		local tmp_e_mail=e_mail[@]
-		local tmp_phone=phone[@]
-		print_contact "$tmp_l_name" "$tmp_f_name" "$tmp_e_mail" "$tmp_phone"
-	done
-}
-
-#Sorting contacts
-contact_sort () {
-	if (( $flag_sort_contacts == f || $flag_sort_contacts == l || $flag_sort_contacts == e || $flag_sort_contacts == p ))
-	then
-		if (( $flag_sort_contacts == f ))
-		then 
-			return 1
-		fi
-		if (( $flag_sort_contacts == l ))
-		then
-			return 2
-		fi
-		if (( $flag_sort_contacts == e ))
-		then
-			return 3
-		fi
-		if (( $flag_sort_contacts == p ))
-		then
-			return 4
-		fi
-	else
-		echo "Sort options are \"f\" \"l\" \"e\" or \"p\""
+sort_contacts () {
+if [ "$flag_sort_contacts" == "f" ] ||
+   [ "$flag_sort_contacts" == "l" ] ||
+   [ "$flag_sort_contacts" == "e" ] ||
+   [ "$flag_sort_contacts" == "n" ]
+then
+	if [ "$flag_sort_contacts" == "f" ]
+	then 
+		flag_sort_contacts="1"
 	fi
+	if [ "$flag_sort_contacts" == "l" ]
+	then
+		flag_sort_contacts="2"
+	fi
+	if [ "$flag_sort_contacts" == "e" ]
+	then
+		flag_sort_contacts="3"
+	fi
+	if [ "$flag_sort_contacts" == "n" ]
+	then
+		flag_sort_contacts="4"
+	fi
+else
+	echo "Sort options are \"f\" \"l\" \"e\" or \"n\""
+	exit 1
+fi
 }
 
 #Setting Flags
-flag_insert_contact=0
-flag_print_contacts=0
-flag_sort_contacts=0
-flag_search_contacts=0
-file_name=0
-fname=0
-lname=0
+flag_insert_contact="0"
+flag_print_contacts="0"
+flag_sort_contacts="0"
+flag_search_contacts="0"
+file_name="0"
+fname="0"
+lname="0"
 email="0"
-phone=0
+phone="0"
 
 #Getting options and starting script
-while getopts ":iPs:f:l:e:n:k:c:" opt; do
+while getopts ":ips:f:l:e:n:k:c:" opt; do
 	case $opt in
 		i ) flag_insert_contact=1;;
-		P ) flag_print_contacts=1;;
+		p ) flag_print_contacts=1;;
 		s ) flag_search_contacts="$OPTARG";;
 		k ) flag_sort_contacts="$OPTARG";;
 		f ) fname="$OPTARG";;
@@ -121,6 +93,7 @@ while getopts ":iPs:f:l:e:n:k:c:" opt; do
 	esac
 done
 
+#Testing email and phone
 if [ "$email" != "0" ] 
 then
 	email_validation "$email"
@@ -129,6 +102,12 @@ fi
 if [ "$phone" != "0" ]
 then
 	phone_validation "$phone"
+fi
+
+#Testing
+if [ "$flag_sort_contacts" != "0" ]
+then
+	sort_contacts "$flag_sort_contacts"
 fi
 
 #Testing to add contact else exit with error
@@ -144,23 +123,24 @@ fi
 #Printing contacts
 if (( $flag_print_contacts == 1 ))
 then
-	if (( $flag_search_contacts != 0 && $flag_sort_contacts == 0 )) 
+	if [ "$flag_search_contacts" != "0" ] && 
+	   [ "$flag_sort_contacts" == "0" ] 
 	then
-		cat contact.txt | egrep '\"$flag_search_contacts\"' | awk -F ":" '{f_name[NR]=$1;l_name[NR]=$2;e_mail[NR]=$3;phone[NR]=$4}'
-		comp_print
+		cat contact.txt | egrep '\"$flag_search_contacts\"' | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
 	fi
 	
-	if (( $flag_search_contacts != 0 && $flag_sort_contacts != 0 ))
+	if [ "$flag_search_contacts" != "0" ] &&
+	   [ "$flag_sort_contacts" != "0" ] 
 	then
-		cat contact.txt | egrep '\"$flag_search_contacts\"' | sort -t ":" -k contact_sort | awk -F ":" '{f_name[NR]=$1;l_name[NR]=$2;e_mail[NR]=$3;phone[NR]=$4}'
-		comp_print
+		cat contact.txt | egrep '\"$flag_search_contacts\"' | sort -t ":" -k "$flag_sort_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
 	fi
-	if (( $flag_search_contacts == 0 && $flag_sort_contacts != 0 ))
+	if [ "$flag_search_contacts" == "0" ] && 
+	   [ "$flag_sort_contacts" != "0" ]
 	then
-		cat contact.txt | sort -t ":" -k contact_sort | awk -F ":" '{f_name[NR]=$1;l_name[NR]=$2;e_mail[NR]=$3;phone[NR]=$4}'
-		comp_print
+		cat contact.txt | sort -t ":" -k "$flag_sort_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
 	fi
- 	if (( $flag_search_contacts == 0 && $flag_sort_contacts == 0 ))
+ 	if [ "$flag_search_contacts" == "0" ] &&
+	   [ "$flag_sort_contacts" == "0" ]
 	then
 		contact_print
 	fi
