@@ -1,7 +1,5 @@
-Aaron:Sullivan:kingaroan@gmail.com:7577747121
-Bob:Hill:bobhill@gmail.com:7587411256
-Trey:Fallwell:tfallwell@liberty.edu:4651249587
-Billy:Henderson:Henderson@yahoo.com:4523257458
-
-Tetst:test::
-Tetst:test:test@tst.com:
+Aaron:Sullivan:kingaroan@gmail.com:757-774-7121
+Bob:Hill:bobhill@gmail.com:758-741-1256
+Trey:Fallwell:tfallwell@liberty.edu:465-124-9587
+Billy:Henderson:Henderson@yahoo.com:452-325-7458
+Hillary:Herritage:phopho@kings.com:758-965-9658
