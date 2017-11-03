@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 set -u
-set -x
+#set -x  #Used only for testing purposes to see the flow of the program
 set -o pipefail
 
 
@@ -32,33 +32,6 @@ test=`echo $1 | egrep '[0-9]{3}-[0-9]{3}-[0-9]{4}' | wc -l`
 if [ $test == "0" ]
 then
 	exit 10
-fi
-}
-
-getoptions_err () {
-if [ "$fname" == "0" ]
-then
-	exit 1
-fi
-
-if [ "$lname" == "0" ]
-then
-	exit 2
-fi
-
-if [ "$email" == "0" ]
-then
-	exit 3
-fi
-
-if [ "$phone" == "0" ]
-then
-	exit 4
-fi
-
-if [ "$file_name" == "0" ]
-then
-	exit 5
 fi
 }
 
@@ -115,10 +88,17 @@ while getopts ":ips:f:l:e:n:k:c:" opt; do
 		c ) file_name="$OPTARG";;
 		\?) echo "Invalid option: -$OPTARG" >&2
 			exit 7;;
-		: ) echo "Must supply an argument to $OPTARG."
-			getoptions_err;;
+#		: ) echo "Must supply an argument to $OPTARG."
+#			getoptions_err;;
 	esac
 done
+
+#Verify file was given
+if [ "$file_name" == "0" ]
+then
+	exit 5
+fi
+
 
 #Verifying if file exist and the one was provided
 if [ "$file_name" != "0" ]
@@ -151,12 +131,28 @@ then
 fi
 
 #Testing to add contact else exit with error
-if [ "$flag_insert_contact" == "1" ] && 
-   [ "$fname" != "0" ] && 
-   [ "$lname" != "0" ] && 
-   [ "$email" != "0" ] && 
-   [ "$phone" != "0" ]
+if [ "$flag_insert_contact" == "1" ] 
 then 
+	if [ "$fname" == "0" ]
+	then
+		exit 1
+	fi
+
+ 	if [ "$lname" == "0" ]
+	then
+		exit 2
+	fi
+
+	if [ "$email" == "0" ]
+	then
+		exit 3
+	fi
+
+	if [ "$phone" == "0" ]
+	then
+		exit 4
+	fi
+
 	insert_contact "$fname" "$lname" "$email" "$phone"
 fi
 
