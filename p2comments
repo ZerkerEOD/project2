@@ -1,0 +1,14 @@
+Default sort is not by last name (-3)
+
+Sort keys should be numbers (1-4) (-4)
+
+Testing multiple commands exposes a syntax error on line 166 (-5)
+Lines should be:
+                val=`cat "$file_name" | egrep $flag_search_contacts | wc -l`
+                if (( $val >= 1 ))
+
+Wrong error codes or email and phone validation failure (-2)
+
+Search works, but it is suppose to be independent of print (-3)
+
+Score: 58/75
