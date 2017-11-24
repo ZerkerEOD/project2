@@ -13,7 +13,7 @@ insert_contact () {
 #Printing contacts
 contact_print () {
 printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
-awk -F":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}' "$file_name"
+awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}' "$file_name"
 }
 
 #Data validation
@@ -36,29 +36,14 @@ fi
 }
 
 sort_contacts () {
-if [ "$flag_sort_contacts" == "f" ] ||
-   [ "$flag_sort_contacts" == "l" ] ||
-   [ "$flag_sort_contacts" == "e" ] ||
-   [ "$flag_sort_contacts" == "n" ]
+if [ "$flag_sort_contacts" == "1" ] ||
+   [ "$flag_sort_contacts" == "2" ] ||
+   [ "$flag_sort_contacts" == "3" ] ||
+   [ "$flag_sort_contacts" == "4" ]
 then
-	if [ "$flag_sort_contacts" == "f" ]
-	then 
-		flag_sort_contacts="1"
-	fi
-	if [ "$flag_sort_contacts" == "l" ]
-	then
-		flag_sort_contacts="2"
-	fi
-	if [ "$flag_sort_contacts" == "e" ]
-	then
-		flag_sort_contacts="3"
-	fi
-	if [ "$flag_sort_contacts" == "n" ]
-	then
-		flag_sort_contacts="4"
-	fi
+	:
 else
-	echo "Sort options are \"f\" \"l\" \"e\" or \"n\""
+	echo "Sort options are \"1\" \"2\" \"3\" or \"4\""
 	exit 6
 fi
 }
@@ -110,7 +95,7 @@ then
 		touch "$file_name"
 	fi
 else
-	exit 1
+	exit 5
 fi
 
 #Testing email and phone
@@ -157,48 +142,48 @@ then
 fi
 
 #Printing contacts
-if [ "$flag_print_contacts" == "1" ]
-then
+#if [ "$flag_print_contacts" == "1" ]
+#then
 	#Search no Sort
-	if [ "$flag_search_contacts" != "0" ] && 
-	   [ "$flag_sort_contacts" == "0" ] 
-	then
-		if [ cat "$file_name" | egrep $flag_search_contacts | wc -l >= "1" ]
-		then
-			printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
-			cat "$file_name" | egrep "$flag_search_contacts" | sort -t ":" -k "2" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
-		else
-			exit 8
-		fi
-	fi
+#	if [ "$flag_search_contacts" != "0" ] && 
+#	   [ "$flag_sort_contacts" == "0" ] 
+#	then
+#		if [ cat "$file_name" | egrep "$flag_search_contacts" | wc -l >= "1" ]
+#		then
+#			printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
+#			cat "$file_name" | egrep "$flag_search_contacts" | sort -t ":" -k "2" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
+#		else
+#			exit 8
+#		fi
+#	fi
 	
 	#Search and Sort
-	if [ "$flag_search_contacts" != "0" ] &&
-	   [ "$flag_sort_contacts" != "0" ] 
-	then
-		if [ cat "$file_name" | egrep "$flag_search_contacts" | wc -l >= "1" ]
-		then
-			printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone" 	
-			cat "$file_name" | egrep "$flag_search_contacts" | sort -t ":" -k "$flag_sort_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
-		else
-			exit 8
-		fi
-	fi
+#	if [ "$flag_search_contacts" != "0" ] &&
+#	   [ "$flag_sort_contacts" != "0" ] 
+#	then
+#		if [ cat "$file_name" | egrep "$flag_search_contacts" | wc -l >= "1" ]
+#		then
+#			printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone" 	
+#			cat "$file_name" | egrep "$flag_search_contacts" | sort -t ":" -k "$flag_sort_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
+#		else
+#			exit 8
+#		fi
+#	fi
 
 	#No Search Only Sort
-	if [ "$flag_search_contacts" == "0" ] && 
-	   [ "$flag_sort_contacts" != "0" ]
-	then
-		printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
-		cat "$file_name" | sort -t ":" -k "$flag_sort_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
-	fi
+#	if [ "$flag_search_contacts" == "0" ] && 
+#	   [ "$flag_sort_contacts" != "0" ]
+#	then
+#		printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
+#		cat "$file_name" | sort -t ":" -k "$flag_sort_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
+#	fi
 
 	#No sort and no search
- 	if [ "$flag_search_contacts" == "0" ] &&
-	   [ "$flag_sort_contacts" == "0" ]
-	then
-		contact_print
-	fi
-fi
+# 	if [ "$flag_search_contacts" == "0" ] &&
+#	   [ "$flag_sort_contacts" == "0" ]
+#	then
+#		contact_print
+#	fi
+#fi
 
 exit 0
