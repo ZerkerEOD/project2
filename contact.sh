@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 set -u
-set -x  #Used only for testing purposes to see the flow of the program
+#set -x  #Used only for testing purposes to see the flow of the program
 set -o pipefail
 
 #FUNCTIONS
@@ -21,13 +21,11 @@ if [ "$flag_search_contacts" != "0" ]
 then
 	if (( $(cat "$file_name" | egrep "$flag_search_contacts" | wc -l) >= "1" ))
 	then
-		cat "$file_name" | egrep "$flag_search_contacts" > tmpcontacts.txt
+		cat "$file_name" | egrep "$flag_search_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
 	else
 		printf "No contacts match search criteria"
 		exit 8
 	fi
-else
-	cp "$file_name" tmpcontacts.txt
 fi
 }
 
@@ -35,9 +33,9 @@ fi
 sort_contacts () {
 if [ "$flag_sort_contacts" != "0" ]
 then
-	sort -t ":" -k "$flag_sort_contacts" tmpcontacts.txt > tmpsortedcontacts.txt
+	sort -t ":" -k "$flag_sort_contacts" "$file_name" > tmpsortedcontacts.txt
 else
-	sort -t ":" -k "2" tmpcontacts.txt > tmpsortedcontacts.txt
+	sort -t ":" -k "2" "$file_name" > tmpsortedcontacts.txt
 fi
 }
 
@@ -149,6 +147,29 @@ then
 	sort_contacts_validation "$flag_sort_contacts"
 fi
 
+#EXITING IF TO MANY COMMANDS
+if [ "$flag_insert_contact" != "0" ] &&
+   [ "$flag_print_contacts" != "0" ]
+then
+	printf "To many commands\n"
+	exit 11
+fi
+
+if [ "$flag_insert_contact" != "0" ] &&
+   [ "$flag_search_contacts" != "0" ]
+then
+	printf "To many commands\n"
+	exit 11
+fi
+
+if [ "$flag_print_contacts" != "0" ] &&
+   [ "$flag_search_contacts" != "0" ]
+then
+	printf "To many commands\n"
+	exit 11
+fi
+
+
 #Testing to add contact else exit with error
 if [ "$flag_insert_contact" == "1" ] 
 then 
@@ -177,55 +198,15 @@ fi
 
 if [ "$flag_print_contacts" == "1" ]
 then
-	search_contacts
 	sort_contacts
 	contact_print_header
 	print_contacts
 	cleanup
 fi
 
-#if [ "$flag_print_contacts" == "1" ]
-#then
-	#Search no Sort
-#	if [ "$flag_search_contacts" != "0" ] && 
-#	   [ "$flag_sort_contacts" == "0" ] 
-#	then
-#		if [ cat "$file_name" | egrep "$flag_search_contacts" | wc -l >= "1" ]
-#		then
-#			printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
-#			cat "$file_name" | egrep "$flag_search_contacts" | sort -t ":" -k "2" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
-#		else
-#			exit 8
-#		fi
-#	fi
-	
-	#Search and Sort
-#	if [ "$flag_search_contacts" != "0" ] &&
-#	   [ "$flag_sort_contacts" != "0" ] 
-#	then
-#		if [ cat "$file_name" | egrep "$flag_search_contacts" | wc -l >= "1" ]
-#		then
-#			printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone" 	
-#			cat "$file_name" | egrep "$flag_search_contacts" | sort -t ":" -k "$flag_sort_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
-#		else
-#			exit 8
-#		fi
-#	fi
-
-	#No Search Only Sort
-#	if [ "$flag_search_contacts" == "0" ] && 
-#	   [ "$flag_sort_contacts" != "0" ]
-#	then
-#		printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
-#		cat "$file_name" | sort -t ":" -k "$flag_sort_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
-#	fi
-
-	#No sort and no search
-# 	if [ "$flag_search_contacts" == "0" ] &&
-#	   [ "$flag_sort_contacts" == "0" ]
-#	then
-#		contact_print
-#	fi
-#fi
+if [ "$flag_search_contacts" != "0" ]
+then
+	search_contacts
+fi
 
 exit 0
