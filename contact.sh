@@ -7,12 +7,12 @@ set -o pipefail
 #FUNCTIONS
 ##Inserting a contact
 insert_contact () {
-	printf "%s:%s:%s:%s\n" "$1" "$2" "$3" "$4" >> "$file_name"
+	printf "%s:%s:%s:%s:%s\n" "$1" "$2" "$3" "$4" "$5" >> "$file_name"
 }
 
 ##Printing contacts
 contact_print_header () {
-printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
+printf "%10s %10s %25s %15s %10\n" "Last" "First" "E-mail" "Phone" "Category"
 }
 
 ##Searching Contacts
@@ -22,12 +22,20 @@ then
 	if (( $(cat "$file_name" | egrep "$flag_search_contacts" | wc -l) >= "1" ))
 	then
 		contact_print_header
-		cat "$file_name" | egrep "$flag_search_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
+		cat "$file_name" | egrep "$flag_search_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s %10s\n", $2,$1,$3,$4,$5}'
 	else
 		printf "No contacts match search criteria"
 		exit 8
 	fi
 fi
+}
+
+##Contact Number
+contact_number () {
+#check last contact for number
+contact_amt="$(cat "$file_name"	| wc -l)"
+
+sed -i "$ s/$/:$contact_amt/" "$file_name"
 }
 
 ##Sort Contacts
@@ -44,7 +52,7 @@ fi
 print_contacts () {
 if [ "$flag_print_contacts" == "1" ]
 then
-	awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}' "tmpsortedcontacts.txt"
+	awk -F ":" '{printf "%10s %10s %25s %15s %10s\n", $2,$1,$3,$4,$5}' "tmpsortedcontacts.txt"
 fi
 }
 
@@ -97,10 +105,11 @@ fname="0"
 lname="0"
 email="0"
 phone="0"
+category="0"
 
 #START OF SCRIPT
 ##Get options from user
-while getopts ":ips:f:l:e:n:k:c:" opt; do
+while getopts ":ips:f:l:e:n:k:c:t:" opt; do
 	case $opt in
 		i ) flag_insert_contact=1;;
 		p ) flag_print_contacts=1;;
@@ -111,6 +120,7 @@ while getopts ":ips:f:l:e:n:k:c:" opt; do
 		e ) email="$OPTARG";;
 		n ) phone="$OPTARG";;
 		c ) file_name="$OPTARG";;
+		t ) category="$OPTARG";;
 		\?) echo "Invalid option: -$OPTARG" >&2
 			exit 7;;
 #		: ) echo "Must supply an argument to $OPTARG."
@@ -153,21 +163,21 @@ if [ "$flag_insert_contact" != "0" ] &&
    [ "$flag_print_contacts" != "0" ]
 then
 	printf "To many commands\n"
-	exit 11
+	exit 15
 fi
 
 if [ "$flag_insert_contact" != "0" ] &&
    [ "$flag_search_contacts" != "0" ]
 then
 	printf "To many commands\n"
-	exit 11
+	exit 15
 fi
 
 if [ "$flag_print_contacts" != "0" ] &&
    [ "$flag_search_contacts" != "0" ]
 then
 	printf "To many commands\n"
-	exit 11
+	exit 15
 fi
 
 
@@ -193,8 +203,14 @@ then
 	then
 		exit 4
 	fi
+	
+	if [ "$category" == "0" ]
+	then
+		exit 11
+	fi
 
-	insert_contact "$fname" "$lname" "$email" "$phone"
+	insert_contact "$fname" "$lname" "$email" "$phone" "$category"
+	contact_number
 fi
 
 if [ "$flag_print_contacts" == "1" ]

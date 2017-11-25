@@ -1,7 +1,8 @@
-Aaron:Sullivan:kingaroan@gmail.com:757-774-7121:Friend
-Bob:Hill:bobhill@gmail.com:758-741-1256:Classmate
-Trey:Fallwell:tfallwell@liberty.edu:465-124-9587:Coworker
-Billy:Henderson:Henderson@yahoo.com:452-325-7458:Friend
-Hillary:Herritage:phopho@kings.com:758-965-9658:Friend
-Kelly:Ferguson:kferguson@liberty.edu:804-929-0744:Friend
-Killer:Jinkins:jinkens@killer.net:741-852-9632:Coworker
+Aaron:Sullivan:kingaroan@gmail.com:757-774-7121:Friend:1
+Bob:Hill:bobhill@gmail.com:758-741-1256:Classmate:2
+Trey:Fallwell:tfallwell@liberty.edu:465-124-9587:Coworker:3
+Billy:Henderson:Henderson@yahoo.com:452-325-7458:Friend:4
+Hillary:Herritage:phopho@kings.com:758-965-9658:Friend:5
+Kelly:Ferguson:kferguson@liberty.edu:804-929-0744:Friend:6
+Killer:Jinkins:jinkens@killer.net:741-852-9632:Coworker:7
+Bilbo:Bagins:bbagins@google.com:758-542-3569:Friend:8
