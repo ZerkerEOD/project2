@@ -1,23 +1,62 @@
 #!/bin/bash
 set -e
 set -u
-#set -x  #Used only for testing purposes to see the flow of the program
+set -x  #Used only for testing purposes to see the flow of the program
 set -o pipefail
 
-
-#Inserting a contact
+#FUNCTIONS
+##Inserting a contact
 insert_contact () {
 	printf "%s:%s:%s:%s\n" "$1" "$2" "$3" "$4" >> "$file_name"
 }
 
-#Printing contacts
-contact_print () {
+##Printing contacts
+contact_print_header () {
 printf "%10s %10s %25s %15s\n" "Last" "First" "E-mail" "Phone"
-awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}' "$file_name"
 }
 
-#Data validation
-#Email validation
+##Searching Contacts
+search_contacts () {
+if [ "$flag_search_contacts" != "0" ]
+then
+	if (( $(cat "$file_name" | egrep "$flag_search_contacts" | wc -l) >= "1" ))
+	then
+		cat "$file_name" | egrep "$flag_search_contacts" > tmpcontacts.txt
+	else
+		printf "No contacts match search criteria"
+		exit 8
+	fi
+else
+	cp "$file_name" tmpcontacts.txt
+fi
+}
+
+##Sort Contacts
+sort_contacts () {
+if [ "$flag_sort_contacts" != "0" ]
+then
+	sort -t ":" -k "$flag_sort_contacts" tmpcontacts.txt > tmpsortedcontacts.txt
+else
+	sort -t ":" -k "2" tmpcontacts.txt > tmpsortedcontacts.txt
+fi
+}
+
+##Printing contacts
+print_contacts () {
+if [ "$flag_print_contacts" == "1" ]
+then
+	awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}' "tmpsortedcontacts.txt"
+fi
+}
+
+##Cleaning up
+cleanup () {
+rm tmpcontacts.txt
+rm tmpsortedcontacts.txt
+}
+
+#DATA VALIDATION
+##Email validation
 email_validation () {
 test=`echo $1 | egrep "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" | wc -l`
 if [ $test == "0" ]
@@ -26,7 +65,7 @@ then
 fi
 }
 
-#Phone validation
+##Phone validation
 phone_validation () {
 test=`echo $1 | egrep '[0-9]{3}-[0-9]{3}-[0-9]{4}' | wc -l`
 if [ $test == "0" ]
@@ -35,7 +74,8 @@ then
 fi
 }
 
-sort_contacts () {
+##Contact sort validation
+sort_contacts_validation () {
 if [ "$flag_sort_contacts" == "1" ] ||
    [ "$flag_sort_contacts" == "2" ] ||
    [ "$flag_sort_contacts" == "3" ] ||
@@ -48,7 +88,7 @@ else
 fi
 }
 
-#Setting Flags
+#SETTING FLAGS
 flag_insert_contact="0"
 flag_print_contacts="0"
 flag_sort_contacts="0"
@@ -59,7 +99,8 @@ lname="0"
 email="0"
 phone="0"
 
-#Getting options and starting script
+#START OF SCRIPT
+##Get options from user
 while getopts ":ips:f:l:e:n:k:c:" opt; do
 	case $opt in
 		i ) flag_insert_contact=1;;
@@ -78,14 +119,7 @@ while getopts ":ips:f:l:e:n:k:c:" opt; do
 	esac
 done
 
-#Verify file was given
-if [ "$file_name" == "0" ]
-then
-	exit 5
-fi
-
-
-#Verifying if file exist and the one was provided
+#Verifying if file exist and that one was provided
 if [ "$file_name" != "0" ]
 then
 	if [ -e "$file_name" ]
@@ -112,7 +146,7 @@ fi
 #Testing
 if [ "$flag_sort_contacts" != "0" ]
 then
-	sort_contacts "$flag_sort_contacts"
+	sort_contacts_validation "$flag_sort_contacts"
 fi
 
 #Testing to add contact else exit with error
@@ -141,7 +175,15 @@ then
 	insert_contact "$fname" "$lname" "$email" "$phone"
 fi
 
-#Printing contacts
+if [ "$flag_print_contacts" == "1" ]
+then
+	search_contacts
+	sort_contacts
+	contact_print_header
+	print_contacts
+	cleanup
+fi
+
 #if [ "$flag_print_contacts" == "1" ]
 #then
 	#Search no Sort
