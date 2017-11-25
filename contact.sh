@@ -21,6 +21,7 @@ if [ "$flag_search_contacts" != "0" ]
 then
 	if (( $(cat "$file_name" | egrep "$flag_search_contacts" | wc -l) >= "1" ))
 	then
+		contact_print_header
 		cat "$file_name" | egrep "$flag_search_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s\n", $2,$1,$3,$4}'
 	else
 		printf "No contacts match search criteria"
