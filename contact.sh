@@ -15,7 +15,7 @@ contact_number () {
 cat contact.txt | awk -F ":" '{printf "%s:%s:%s:%s:%s:%s:%s\n", $1,$2,$3,$4,$5,NR}' >> tmpcontact.txt
 rm contact.txt
 cp tmpcontact.txt contact.txt
-rm contact.txt
+rm tmpcontact.txt
 }
 
 ##Printing contacts
@@ -128,10 +128,11 @@ category="0"
 show_contact_number="false"
 flag_edit_contact="false"
 search_field="false"
+flag_econtactnum="false"
 
 #START OF SCRIPT
 ##Get options from user
-while getopts ":ips:f:l:e:n:k:c:t:LE:S:" opt; do
+while getopts ":ips:f:l:e:n:k:c:t:LE:S:N:" opt; do
 	case $opt in
 		i ) flag_insert_contact=1;;
 		p ) flag_print_contacts=1;;
@@ -146,6 +147,7 @@ while getopts ":ips:f:l:e:n:k:c:t:LE:S:" opt; do
 		L ) show_contact_number="true";;
 		E ) flag_edit_contact="$OPTARG";;
 		S ) search_field="$OPTARG";;
+		N ) flag_econtactnum="$OPTARG";;
 		\?) echo "Invalid option: -$OPTARG" >&2
 			exit 7;;
 #		: ) echo "Must supply an argument to $OPTARG."
