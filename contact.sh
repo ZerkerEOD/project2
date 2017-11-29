@@ -10,8 +10,23 @@ insert_contact () {
 	printf "%s:%s:%s:%s:%s\n" "$1" "$2" "$3" "$4" "$5" >> "$file_name"
 }
 
+##Adding contact numbers
+contact_number () {
+cat contact.txt | awk -F ":" '{printf "%s:%s:%s:%s:%s:%s:%s\n", $1,$2,$3,$4,$5,NR}' >> tmpcontact.txt
+rm contact.txt
+cp tmpcontact.txt contact.txt
+rm contact.txt
+}
+
 ##Printing contacts
 contact_print_header () {
+if [ "$show_contact_number" == "false" ]
+then
+	printf "%10s %10s %25s %15s %10\n" "Last" "First" "E-mail" "Phone" "Category"
+elif [ "$show_contact_number" == "true" ]
+then
+	printf "%3s %10s %10s %25s %15s %10s\n" "#" "Last" "First" "E-mail" "Phone" "Category"
+fi
 printf "%10s %10s %25s %15s %10\n" "Last" "First" "E-mail" "Phone" "Category"
 }
 
@@ -30,14 +45,6 @@ then
 fi
 }
 
-##Contact Number
-contact_number () {
-#check last contact for number
-contact_amt="$(cat "$file_name"	| wc -l)"
-
-sed -i "$ s/$/:$contact_amt/" "$file_name"
-}
-
 ##Sort Contacts
 sort_contacts () {
 if [ "$flag_sort_contacts" != "0" ]
@@ -52,7 +59,13 @@ fi
 print_contacts () {
 if [ "$flag_print_contacts" == "1" ]
 then
-	awk -F ":" '{printf "%10s %10s %25s %15s %10s\n", $2,$1,$3,$4,$5}' "tmpsortedcontacts.txt"
+	if [ "$show_contact_number" == "false" ]
+	then
+		awk -F ":" '{printf "%10s %10s %25s %15s %10s\n", $2,$1,$3,$4,$5}' "tmpsortedcontacts.txt"
+	elif [ "$show_contact_number" == "true" ]
+	then
+		awk -F ":" '{printf "%3s %10s %10s %25s %15s %10s\n, $6,$2,$1,$3,$4,$5}' "tmpsortedcontacts.txt"
+	fi
 fi
 }
 
@@ -60,6 +73,12 @@ fi
 cleanup () {
 rm tmpcontacts.txt
 rm tmpsortedcontacts.txt
+}
+
+#Set up editing of contacts
+edit_contact () {
+
+
 }
 
 #DATA VALIDATION
@@ -106,10 +125,13 @@ lname="0"
 email="0"
 phone="0"
 category="0"
+show_contact_number="false"
+flag_edit_contact="false"
+search_field="false"
 
 #START OF SCRIPT
 ##Get options from user
-while getopts ":ips:f:l:e:n:k:c:t:" opt; do
+while getopts ":ips:f:l:e:n:k:c:t:LE:S:" opt; do
 	case $opt in
 		i ) flag_insert_contact=1;;
 		p ) flag_print_contacts=1;;
@@ -121,6 +143,9 @@ while getopts ":ips:f:l:e:n:k:c:t:" opt; do
 		n ) phone="$OPTARG";;
 		c ) file_name="$OPTARG";;
 		t ) category="$OPTARG";;
+		L ) show_contact_number="true";;
+		E ) flag_edit_contact="$OPTARG";;
+		S ) search_field="$OPTARG";;
 		\?) echo "Invalid option: -$OPTARG" >&2
 			exit 7;;
 #		: ) echo "Must supply an argument to $OPTARG."
@@ -139,6 +164,31 @@ then
 	fi
 else
 	exit 5
+fi
+
+#Verify Search flag
+if [ "$search_field" != "false" ]
+then
+	if [ "$search_field" == "1" ] ||
+  	   [ "$search_field" == "2" ] ||
+	   [ "$search_field" == "3" ] ||
+	   [ "$search_field" == "4" ] ||
+	   [ "$search_field" == "5" ]
+	then
+		;
+	else
+		printf "Search field invalid"
+		exit 15
+	fi
+fi
+
+if ( [ "$search_field" != "false" ] &&
+   [ "$flag_search_contacts" != "0" ] ) ||
+   ( [ "$search_field" != "false" ] &&
+   [ "$flag_edit_contact" != "false" ] )
+then
+	printf "Search within field needs a serach criteria or edit"
+	exit 14
 fi
 
 #Testing email and phone
@@ -225,5 +275,7 @@ if [ "$flag_search_contacts" != "0" ]
 then
 	search_contacts
 fi
+
+
 
 exit 0
