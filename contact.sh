@@ -12,9 +12,9 @@ insert_contact () {
 
 ##Adding contact numbers
 contact_number () {
-cat contact.txt | awk -F ":" '{printf "%s:%s:%s:%s:%s:%s:%s\n", $1,$2,$3,$4,$5,NR}' >> tmpcontact.txt
-rm contact.txt
-cp tmpcontact.txt contact.txt
+cat "$file_name" | awk -F ":" '{printf "%s:%s:%s:%s:%s:%s:%s\n", $1,$2,$3,$4,$5,NR}' >> tmpcontact.txt
+rm "$file_name"
+cp tmpcontact.txt "$file_name"
 rm tmpcontact.txt
 }
 
@@ -34,7 +34,13 @@ printf "%10s %10s %25s %15s %10\n" "Last" "First" "E-mail" "Phone" "Category"
 search_contacts () {
 if [ "$flag_search_contacts" != "0" ]
 then
-	if (( $(cat "$file_name" | egrep "$flag_search_contacts" | wc -l) >= "1" ))
+    if [ $flag_search_feild == "true" ]
+    then
+        if (( $(cat "$file_name" | awk -F ":" '/"$flag_search_contacts"/ {if ($search_field") print $0;}' || wc -l) >= "1" ))
+        then
+            cat "$file_name" | awk -F ":" '/"$flag_search_contacts"/ {if ($search_field") print $0;}'
+        fi
+	elif (( $(cat "$file_name" | egrep "$flag_search_contacts" | wc -l) >= "1" ))
 	then
 		contact_print_header
 		cat "$file_name" | egrep "$flag_search_contacts" | awk -F ":" '{printf "%10s %10s %25s %15s %10s\n", $2,$1,$3,$4,$5}'
@@ -127,7 +133,8 @@ phone="0"
 category="0"
 show_contact_number="false"
 flag_edit_contact="false"
-search_field="false"
+flag_search_field="false"
+search_field="0"
 flag_econtactnum="false"
 
 #START OF SCRIPT
@@ -146,7 +153,8 @@ while getopts ":ips:f:l:e:n:k:c:t:LE:S:N:" opt; do
 		t ) category="$OPTARG";;
 		L ) show_contact_number="true";;
 		E ) flag_edit_contact="$OPTARG";;
-		S ) search_field="$OPTARG";;
+		S ) search_field="$OPTARG"
+		    flag_search_field="true";;
 		N ) flag_econtactnum="$OPTARG";;
 		\?) echo "Invalid option: -$OPTARG" >&2
 			exit 7;;
@@ -169,29 +177,43 @@ else
 fi
 
 #Verify Search flag
-if [ "$search_field" != "false" ]
+if [ $flag_search_field != "false" ]
 then
-	if [ "$search_field" == "1" ] ||
-  	   [ "$search_field" == "2" ] ||
-	   [ "$search_field" == "3" ] ||
-	   [ "$search_field" == "4" ] ||
-	   [ "$search_field" == "5" ]
-	then
-		;
-	else
-		printf "Search field invalid"
-		exit 15
+    if [ "$search_field" == "0" ] ||
+       [ "$search_field" == "1" ] ||
+       [ "$search_field" == "2" ] ||
+       [ "$search_field" == "3" ] ||
+       [ "$search_field" == "4" ] ||
+       [ "$search_field" == "5" ]
+    then
+	    :
+    else
+	    printf "Search field invalid"
+	    exit 15
 	fi
 fi
 
-if ( [ "$search_field" != "false" ] &&
+#Verify search field only gets used with either search or edit
+if ( [ "$search_field" != "0" ] &&
    [ "$flag_search_contacts" != "0" ] ) ||
-   ( [ "$search_field" != "false" ] &&
+   ( [ "$search_field" != "0" ] &&
    [ "$flag_edit_contact" != "false" ] )
 then
-	printf "Search within field needs a serach criteria or edit"
+	printf "Search within field needs a search criteria or edit"
 	exit 14
 fi
+
+#Validate edit
+if ( [ "$flag_edit_contact" != "false" ] &&
+     [ "$search_field" != "0" ] ) ||
+   ( [ "$flag_edit_contact" != "false" ] &&
+     [ "$flag_econtactnum" != "false" ] )
+then
+    printf "Can only use either search or contact number"
+    exit 15
+fi
+
+
 
 #Testing email and phone
 if [ "$email" != "0" ] 
@@ -265,6 +287,7 @@ then
 	contact_number
 fi
 
+#PRINTING CONTACTS
 if [ "$flag_print_contacts" == "1" ]
 then
 	sort_contacts
@@ -273,10 +296,12 @@ then
 	cleanup
 fi
 
+#SEARCHING CONTACTS
 if [ "$flag_search_contacts" != "0" ]
 then
 	search_contacts
 fi
+
 
 
 
