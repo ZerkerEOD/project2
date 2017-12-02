@@ -82,9 +82,131 @@ rm tmpsortedcontacts.txt
 }
 
 #Set up editing of contacts
+##Key = 1 flag_edit_contact - 2 search_field - 3 flag_econtactnum
+##4 fname - 5 lname - 6 email - 7 phone - 8 category
 edit_contact () {
+###Edit contact with just -E
+if [ "$1" != "0" ]
+then
+    if [ $(egrep '$1' "$file_name" | wc -l) == "1" ]
+    then
+        tmpfname=$(egrep '$1' "$file_name" | awk -F ":" '{print $1}')
+        tmplname=$(egrep '$1' "$file_name" | awk -F ":" '{print $2}')
+        tmpemail=$(egrep '$1' "$file_name" | awk -F ":" '{print $3}')
+        tmpphone=$(egrep '$1' "$file_name" | awk -F ":" '{print $4}')
+        tmpcategory=$(egrep '$1' "$file_name" | awk -F ":" '{print $5}')
 
+        if [ "$fname" == "0" ]
+        then
+            fname=$tmpfname
+        fi
+        if [ "$lname" == "0" ]
+        then
+            lname=$tmplname
+        fi
+        if [ "$email" == "0" ]
+        then
+            email=$tmpemail
+        fi
+        if [ "$phone" == "0" ]
+        then
+            phone=$tmpphone
+        fi
+        if [ "$category" == "0" ]
+        then
+            category=$tmpcategory
+        fi
 
+        sed -i "s/$tmpfname/$fname/" "$file_name"
+        sed -i "s/$tmplname/$lname/" "$file_name"
+        sed -i "s/$tmpemail/$email/" "$file_name"
+        sed -i "s/$tmpphone/$phone/" "$file_name"
+        sed -i "s/$tmpcategory/$category/" "$file_name"
+    else
+        printf "To many contacts:\n"
+        egrep '$1' "$file_name"
+        exit 15
+    fi
+#Search within field for specific
+elif [ "$2" != "0" ]
+then
+    if [ $(awk -F ":" '{print $2}' "$file_name" | egrep '$1' | wc -l) == "1" ]
+    then
+        tmpfname=$(egrep '$1' "$file_name" | awk -F ":" '{print $1}')
+        tmplname=$(egrep '$1' "$file_name" | awk -F ":" '{print $2}')
+        tmpemail=$(egrep '$1' "$file_name" | awk -F ":" '{print $3}')
+        tmpphone=$(egrep '$1' "$file_name" | awk -F ":" '{print $4}')
+        tmpcategory=$(egrep '$1' "$file_name" | awk -F ":" '{print $5}')
+
+        if [ "$fname" == "0" ]
+        then
+            fname=$tmpfname
+        fi
+        if [ "$lname" == "0" ]
+        then
+            lname=$tmplname
+        fi
+        if [ "$email" == "0" ]
+        then
+            email=$tmpemail
+        fi
+        if [ "$phone" == "0" ]
+        then
+            phone=$tmpphone
+        fi
+        if [ "$category" == "0" ]
+        then
+            category=$tmpcategory
+        fi
+
+        sed -i "s/$tmpfname/$fname/" "$file_name"
+        sed -i "s/$tmplname/$lname/" "$file_name"
+        sed -i "s/$tmpemail/$email/" "$file_name"
+        sed -i "s/$tmpphone/$phone/" "$file_name"
+        sed -i "s/$tmpcategory/$category/" "$file_name"
+    else
+        printf "To many contacts:\n"
+        egrep '$1' "$file_name"
+        exit 15
+    fi
+
+###Using contact number to edit
+elif [ "$3" != "0" ]
+then
+        tmpfname=$(sed -n "$flag_econtactnum p" "$file_name" | awk -F ":" '{print $1}')
+        tmplname=$(sed -n "$flag_econtactnum p" "$file_name" | awk -F ":" '{print $2}')
+        tmpemail=$(sed -n "$flag_econtactnum p" "$file_name" | awk -F ":" '{print $3}')
+        tmpphone=$(sed -n "$flag_econtactnum p" "$file_name" | awk -F ":" '{print $4}')
+        tmpcategory=$(sed -n "$flag_econtactnum p" "$file_name" | awk -F ":" '{print $5}')
+
+        if [ "$fname" == "0" ]
+        then
+            fname=$tmpfname
+        fi
+        if [ "$lname" == "0" ]
+        then
+            lname=$tmplname
+        fi
+        if [ "$email" == "0" ]
+        then
+            email=$tmpemail
+        fi
+        if [ "$phone" == "0" ]
+        then
+            phone=$tmpphone
+        fi
+        if [ "$category" == "0" ]
+        then
+            category=$tmpcategory
+        fi
+
+        sed -i "s/$tmpfname/$fname/" "$file_name"
+        sed -i "s/$tmplname/$lname/" "$file_name"
+        sed -i "s/$tmpemail/$email/" "$file_name"
+        sed -i "s/$tmpphone/$phone/" "$file_name"
+        sed -i "s/$tmpcategory/$category/" "$file_name"
+    fi
+fi
 }
 
 #DATA VALIDATION
@@ -213,7 +335,24 @@ then
     exit 15
 fi
 
-
+if [ "$flag_edit_contact" != "0" ]
+then
+    if [ "$flag_search_field" != "0" ] ||
+       [ "$flag_econtactnum" != "0" ]
+    then
+        if [ "$fname" != "0" ] ||
+           [ "$lname" != "0" ] ||
+           [ "$email" != "0" ] ||
+           [ "$phone" != "0" ] ||
+           [ "$category" != "0" ]
+        then
+            edit_contact "$flag_edit_contact" "$search_field" "$flag_econtactnum" "$fname" "$lname" "$email" "$phone" "$category"
+        fi
+    else
+        printf "Can only use either search or contact number"
+        exit 15
+    fi
+fi
 
 #Testing email and phone
 if [ "$email" != "0" ] 
@@ -301,8 +440,5 @@ if [ "$flag_search_contacts" != "0" ]
 then
 	search_contacts
 fi
-
-
-
 
 exit 0
